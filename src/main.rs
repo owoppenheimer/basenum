@@ -1,20 +1,30 @@
+use libm::pow;
 use argh::FromArgs;
+use std::process::exit;
 
 #[derive(Debug, FromArgs)]
 /// A simple program that converts a number into specific number system.
 struct Arguments {
-    /// specify a number system.
-    #[argh(option, short = 'b')]
-    number_system: Option<u64>,
+    /// specify a number system (up to 36)
+    #[argh(option, short = 'b', default = "2")]
+    number_system: u64,
+
+    /// convert into decimal
+    #[argh(switch, short = 'd')]
+    into_dec: bool,
 
     #[argh(positional)]
-    number: u64
+    number: String
 }
 
 // convert a number
 fn to_base(mut num: u64, number_system: u64) -> String {
     if num == 0 {
         return "0".to_string();
+    }
+    if number_system > 36 {
+        eprintln!("Number system cannot be higher than 36. ({number_system})");
+        exit(1);
     }
 
     let mut result = String::new();
@@ -28,14 +38,27 @@ fn to_base(mut num: u64, number_system: u64) -> String {
     result.chars().rev().collect()
 }
 
+fn into_decimal(number: String, number_system: &u32) -> u64 {
+    let mut result: f64 = 0.0;
+    for (key, value) in number.chars().rev().enumerate() {
+        result += value.to_digit(*number_system).unwrap() as f64 * pow(*number_system as f64, key as f64);
+    }
+
+    result as u64
+}
+
 fn main() {
-    let number_system: Arguments = argh::from_env();
+    let args: Arguments = argh::from_env();
 
-    match number_system.number_system {
-        Some(2) | std::option::Option::None => println!("{:b}", number_system.number),
+    if args.into_dec {
+        println!("{}", into_decimal(args.number.to_string(), &(args.number_system as u32)));
+    } else {
+        let u64num = args.number.trim().parse::<u64>().expect(&format!("{}: Couldn't parse a number (u64)", args.number));
 
-        Some(value) => {
-            println!("{}", to_base(number_system.number, value));
-        },
+        if args.number_system == 2 {
+            println!("{u64num:b}");
+        } else {
+            println!("{}", to_base(u64num, args.number_system));
+        }
     }
 }
