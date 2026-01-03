@@ -22,10 +22,6 @@ fn to_base(mut num: u64, number_system: u64) -> String {
     if num == 0 {
         return "0".to_string();
     }
-    if number_system > 36 {
-        eprintln!("Number system cannot be higher than 36. ({number_system})");
-        exit(1);
-    }
 
     let mut result = String::new();
     let digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -49,6 +45,10 @@ fn into_decimal(number: String, number_system: &u32) -> u64 {
 
 fn main() {
     let args: Arguments = argh::from_env();
+    if args.number_system > 36 {
+        eprintln!("Number system cannot be higher than 36. ({})", args.number_system);
+        exit(1);
+    }
 
     if args.into_dec {
         println!("{}", into_decimal(args.number.to_string(), &(args.number_system as u32)));
