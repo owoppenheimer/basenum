@@ -13,8 +13,13 @@ struct Arguments {
     #[argh(switch, short = 'd')]
     into_dec: bool,
 
+    /// a number to convert
     #[argh(positional)]
-    number: String
+    number: String,
+
+    /// a number of bits to print (optional)
+    #[argh(positional)]
+    bits: Option<usize>
 }
 
 // convert a number
@@ -56,7 +61,12 @@ fn main() {
         let u64num = args.number.trim().parse::<u64>().expect(&format!("{}: Couldn't parse a number (u64)", args.number));
 
         if args.number_system == 2 {
-            println!("{u64num:b}");
+            let bits = args.bits.unwrap_or({
+                if u64num == 0 { 1 } else {
+                    ((u64num as f64).log2().ceil() as usize).max(1)
+                }
+            });
+            println!("{u64num:0bits$b}");
         } else {
             println!("{}", to_base(u64num, args.number_system));
         }
