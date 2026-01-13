@@ -1,4 +1,3 @@
-use libm::pow;
 use argh::FromArgs;
 use std::process::exit;
 
@@ -39,13 +38,13 @@ fn to_base(mut num: u64, number_system: u64) -> String {
     result.chars().rev().collect()
 }
 
-fn into_decimal(number: String, number_system: &u32) -> u64 {
-    let mut result: f64 = 0.0;
+fn into_decimal(number: String, number_system: &u32) -> u32 {
+    let mut result = 0u32;
     for (key, value) in number.chars().rev().enumerate() {
-        result += value.to_digit(*number_system).unwrap() as f64 * pow(*number_system as f64, key as f64);
+        result += value.to_digit(*number_system).unwrap() * number_system.pow(key as u32);
     }
 
-    result as u64
+    result
 }
 
 fn main() {
